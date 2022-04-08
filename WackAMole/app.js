@@ -2,11 +2,67 @@ const squares = document.querySelectorAll('.square')
 const mole = document.querySelector('.mole')
 const timeLeft = document.querySelector('#time-left')
 const score = document.querySelector('#score')
+const restartButton = document.getElementById('restart')
+const currentSpeedText = document.getElementById('current-speed')
+const desiredSpeedText = document.getElementById('desired-speed')
+const speedUpButton = document.getElementById('speed-up')
+const speedDownButton = document.getElementById('speed-down')
 
 let result = 0
 let hitPosition
 let currentTime = 10
 let timerId = null
+let countDownTimerId = null
+let desiredSpeed = 1000
+let currentSpeed = 1000
+
+const maxRoundsPerGame = 10
+const speedStep = 100
+const minSpeed = 2000
+
+
+function restartBoard() {
+    console.log('restart board')
+    restartButton.textContent = 'restart'
+    setUpParameters()
+    eraseTimers()
+    countDownTimerId = setInterval(countDown, currentSpeed)
+    moveMole()
+}
+
+function eraseTimers() {
+    clearInterval(countDownTimerId)
+    clearInterval(timerId)
+}
+
+function setUpParameters() {
+    currentTime = maxRoundsPerGame
+    timeLeft.textContent = currentTime
+    result = 0
+    score.textContent = result
+    currentSpeed = desiredSpeed
+    currentSpeedText.textContent = currentSpeed
+}
+
+restartButton.addEventListener('click', restartBoard)
+speedUpButton.addEventListener('click', speedUp)
+speedDownButton.addEventListener('click', speedDown)
+
+function speedUp() {
+    desiredSpeed -= speedStep
+    if (desiredSpeed == 0) {
+        desiredSpeed = speedStep
+    }
+    desiredSpeedText.textContent = desiredSpeed
+}
+
+function speedDown() {
+    desiredSpeed += speedStep
+    if (desiredSpeed >= minSpeed) {
+        desiredSpeed = minSpeed
+    }
+    desiredSpeedText.textContent = desiredSpeed
+}
 
 function randomSquare() {
     squares.forEach(square => {
@@ -25,16 +81,21 @@ squares.forEach(square => {
             result++
             score.textContent = result
             hitPosition = null
+            square.classList.remove('mole')
+        } else {
+            result--
+            if (result < 0) {
+                result = 0
+            }
+            score.textContent = result
         }
     })
 })
 
 
 function moveMole() {
-    timerId = setInterval(randomSquare, 1000)
+    timerId = setInterval(randomSquare, currentSpeed)
 }
-
-moveMole()
 
 function countDown() {
     currentTime--
@@ -46,8 +107,6 @@ function countDown() {
         alert('Game Over! Your final score is ' + result)
     }
 }
-
-let countDownTimerId = setInterval(countDown, 1000)
 
 
 
